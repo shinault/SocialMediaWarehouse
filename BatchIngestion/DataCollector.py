@@ -30,8 +30,10 @@ def decompress(compressed_filename, decomp_filename, compression_method):
 def write_to_S3(filename, destination, bucket_name):
     """Writes file to S3 bucket and deletes copy from EC2 instance
     """
-    s3 = boto3.resource('s3')
-    with open(filename, 'rb') as data:
-        s3.Bucket(bucket_name).put_object(Key=destination, Body=data)
-    os.remove(filename)
+    session = boto3.Session()
+    s3 = session.client('s3')
+    transfer_config = boto3.s3.transfer.TransferConfig()
+    transfer = boto3.s3.transfer.S3Transfer(client=s3, config=transfer_config)
+    transfer.upload_file(filename, bucket_name, destination)
+
     
