@@ -35,4 +35,4 @@ if __name__ == "__main__":
         DataCollector.decompress(filename, "7z", folder_name)
         print("Transferring folder to S3: " + folder_name)
         DataCollector.write_folder_to_S3(folder_name, s3_folder, s3_bucket)
-        shutil.rmtree("folder_name")
+        shutil.rmtree(folder_name)
