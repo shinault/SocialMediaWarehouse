@@ -15,10 +15,11 @@ reddit_files = bz2_files
 
 if __name__ == "__main__":
     for (filename, ext) in reddit_files:
-        full_url = base_url + filename + "." + ext
-        print("Downloading file: " + filename)
-        DataCollector.download(full_url, filename)
-        print("Decompressing file: " + filename)
-        DataCollector.decompress(filename + "." + ext, ext)
+        dl_name = filename + "." + ext
+        full_url = base_url + dl_name
+        print("Downloading file: " + dl_name)
+        DataCollector.download(full_url, dl_name)
+        print("Decompressing file: " + dl_name)
+        DataCollector.decompress(dl_name, ext)
         print("Transferring file to S3")
         DataCollector.write_to_S3(filename, s3_folder, "saywhat-warehouse")
