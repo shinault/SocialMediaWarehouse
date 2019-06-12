@@ -4,7 +4,7 @@ base_url = "https://files.pushshift.io/reddit/comments/"
 s3_folder = "raw/reddit/"
 
 def year_month_list(yr, begin, end, ext):
-    return [("RC_" + str(yr) + "-" + str(month), ext) for month in range(begin, end+1)]
+    return [("RC_" + str(yr) + "-" + str(month).zfill(2), ext) for month in range(begin, end+1)]
 
 bz2_files = [("RC_2005-12", "bz2")]
 for year in range(2006, 2017):
