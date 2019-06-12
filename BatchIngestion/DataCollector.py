@@ -1,6 +1,6 @@
 import requests
-import bz2
 import os
+import subprocess
 import boto3
 
 def download(src, destination, method="direct"):
@@ -17,15 +17,16 @@ def download(src, destination, method="direct"):
             f.write(r.content)
 
 
-def decompress(compressed_filename, decomp_filename, compression_method):
+def decompress(compressed_filename, compression_method):
     """Decompresses a file and delete compressed file
     """
     if compression_method == "bz2":
-        with open(decomp_filename, 'a+b') as f, bz2.open(compressed_filename, 'rb') as data:
-            for line in data:
-                f.write(line)
-        os.remove(compressed_filename)        
-    
+        subprocess.run(["bunzip2", compressed_filename])
+    elif compression_method == "7z":
+        subprocess.run(["7z", "x", compressed_filename, "-otemp"])
+        os.remove(compressed_filename)
+    elif compression_method == "xz":
+        subprocess.run(["xz", "--decompress", compressed_filename])
 
 def write_to_S3(filename, destination, bucket_name):
     """Writes file to S3 bucket and deletes copy from EC2 instance
@@ -36,4 +37,3 @@ def write_to_S3(filename, destination, bucket_name):
     transfer = boto3.s3.transfer.S3Transfer(client=s3, config=transfer_config)
     transfer.upload_file(filename, bucket_name, destination)
 
-    
