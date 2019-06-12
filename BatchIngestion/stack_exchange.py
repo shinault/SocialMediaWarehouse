@@ -32,6 +32,6 @@ if __name__ == "__main__":
         DataCollector.download(full_url, filename)
         print("Decompressing file: " + filename)
         DataCollector.decompress(filename, folder, "7z")
-        print("Transferring folder to S3: " + folder_name)
+        print("Transferring folder to S3: " + folder)
         DataCollector.write_folder_to_S3(local_folder, "saywhat-warehouse", s3_folder)
-        shutil.rmtree("folder_name")
+        shutil.rmtree("folder")
