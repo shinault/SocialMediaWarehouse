@@ -29,9 +29,9 @@ if __name__ == "__main__":
         full_url = se_base_url + filename
         folder = filename[:-3]
         print("Downloading file: " + filename)
-        DataCollector.download(full_url, filename)
+        DataCollector.download(se_base_url + filename, filename)
         print("Decompressing file: " + filename)
-        DataCollector.decompress(filename, folder, "7z")
-        print("Transferring folder to S3: " + folder)
-        DataCollector.write_folder_to_S3(folder, "saywhat-warehouse", s3_folder)
-        shutil.rmtree("folder")
+        DataCollector.decompress(filename, "7z", folder_name)
+        print("Transferring folder to S3: " + folder_name)
+        DataCollector.write_folder_to_S3(folder_name, s3_folder, s3_bucket)
+        shutil.rmtree("folder_name")
