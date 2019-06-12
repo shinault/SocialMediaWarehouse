@@ -23,3 +23,4 @@ if __name__ == "__main__":
         DataCollector.decompress(dl_name, ext)
         print("Transferring file to S3")
         DataCollector.write_to_S3(filename, s3_folder + filename, "saywhat-warehouse")
+        os.remove(filename)
