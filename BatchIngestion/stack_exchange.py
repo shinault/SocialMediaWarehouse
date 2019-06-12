@@ -27,7 +27,7 @@ s3_folder = "raw/stack_exchange/"
 if __name__ == "__main__":
     for filename in se_7z_files:
         full_url = se_base_url + filename
-        folder = filename[:-3]
+        folder_name = filename[:-3]
         print("Downloading file: " + filename)
         DataCollector.download(se_base_url + filename, filename)
         print("Decompressing file: " + filename)
