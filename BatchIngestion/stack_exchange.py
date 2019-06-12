@@ -23,6 +23,7 @@ for file_node in file_nodes:
 # Execute the file transfers
 se_base_url = "https://archive.org/download/stackexchange/"
 s3_folder = "raw/stack_exchange/"
+s3_bucket = "saywhat-warehouse"
 
 if __name__ == "__main__":
     for filename in se_7z_files:
