@@ -1,4 +1,5 @@
 import DataCollector
+import os
 
 base_url = "https://files.pushshift.io/reddit/comments/"
 s3_folder = "raw/reddit/"
