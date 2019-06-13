@@ -1,4 +1,3 @@
-import requests
 import os
 import subprocess
 import boto3
@@ -12,7 +11,7 @@ def download(src, destination, method="direct"):
     method (string): 'direct' (might add more later)
     """
     if method == "direct":
-        subprocess.run(["wget", src, "-O", destination])
+        subprocess.run(["wget", "-O", destination, src])
 
 
 def decompress(compressed_filename, compression_method, extract_name="temp"):
@@ -31,7 +30,8 @@ def write_to_S3(filename, destination, bucket_name):
     """
     session = boto3.Session()
     s3 = session.client('s3')
-    transfer_config = boto3.s3.transfer.TransferConfig()
+    transfer_config = boto3.s3.transfer.TransferConfig(multipart_threshold=838860800,
+                                                       multipart_chunksize=838860800)
     transfer = boto3.s3.transfer.S3Transfer(client=s3, config=transfer_config)
     transfer.upload_file(filename, bucket_name, destination)
 

@@ -4,7 +4,6 @@
 
 This uses the following Python 3 packages:
 
-* `requests`
 * `os`
 * `boto3`
 * `subprocess`
@@ -20,4 +19,5 @@ The following command line utilities are used:
 * `bzip2` 
 * `p7zip-full`
 * `xz`
+* `wget`
 * `zstd`
