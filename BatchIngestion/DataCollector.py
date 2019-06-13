@@ -12,9 +12,7 @@ def download(src, destination, method="direct"):
     method (string): 'direct' (might add more later)
     """
     if method == "direct":
-        r = requests.get(src)
-        with open(destination, 'wb') as f:
-            f.write(r.content)
+        subprocess.run(["wget", src, "-O", destination])
 
 
 def decompress(compressed_filename, compression_method, extract_name="temp"):
