@@ -8,10 +8,11 @@ object App {
       case "stackexchange" => {
         println("This is a valid command, but not yet implemented")
       }
-        
+
       case "reddit" => {
+        println(s"Collecting files from the glob ${fileGlob}")
         val df = RT.connectToData(fileGlob)
-        println(df.count())
+        println(s"There are this many rows: ${df.count()}")
         RT.sparkStop()
       }
 
