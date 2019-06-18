@@ -1,10 +1,10 @@
-package reddittransformer
+package transformer
 
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import java.sql.{Connection, DriverManager}
 import java.util.Properties
 
-object RedditTransformer {
+object Transformer {
   val spark = SparkSession
     .builder()
     .appName("BA Transformer")
@@ -12,15 +12,15 @@ object RedditTransformer {
 
   import spark.implicits._
 
-  def connectToData(fileGlob: String) = spark.read
+  def connectToJsonData(fileGlob: String) = spark.read
     .json(fileGlob)
     .select("created_utc", "body")
 
-  def addToDB(commentsDF: DataFrame) = {
+  def addToDB(commentsDF: DataFrame, dbName: String, tblName: String) = {
     
     val jdbcHostname = System.getenv("COMMENTS_DB_HOSTNAME")
     val jdbcPort = System.getenv("COMMENTS_DB_PORT")
-    val jdbcDatabase = "comments"
+    val jdbcDatabase = dbName
     val jdbcUsername = System.getenv("COMMENTS_DB_USERNAME")
     val jdbcPassword = System.getenv("COMMENTS_DB_PASSWORD")
     val jdbcUrl = s"jdbc:postgresql://${jdbcHostname}:${jdbcPort}/${jdbcDatabase}"
@@ -33,7 +33,7 @@ object RedditTransformer {
 
     commentsDF.write
       .mode(SaveMode.Append)
-      .jdbc(jdbcUrl, "reddit", connectionProperties)
+      .jdbc(jdbcUrl, tblName, connectionProperties)
   }
 
   def sparkStop() = spark.stop()

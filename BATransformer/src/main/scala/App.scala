@@ -1,4 +1,4 @@
-import reddittransformer.{RedditTransformer => RT}
+import transformer.{Transformer => T}
 
 object App {
   def main(args: Array[String]) {
@@ -11,7 +11,7 @@ object App {
 
       case "reddit" => {
         println(s"Connecting to files from the glob ${fileGlob}...")
-        val df = RT.connectToData(fileGlob)
+        val df = T.connectToJsonData(fileGlob, "comments", "reddit")
         println(s"Reading and writing files to database...")
         RT.addToDB(df)
         RT.sparkStop()
