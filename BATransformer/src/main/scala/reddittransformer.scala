@@ -23,7 +23,7 @@ object RedditTransformer {
     val jdbcDatabase = "comments"
     val jdbcUsername = System.getenv("COMMENTS_DB_USERNAME")
     val jdbcPassword = System.getenv("COMMENTS_DB_PASSWORD")
-    val jdbcUrl = s"jdbc:postgres://${jdbcHostname}:${jdbcPort}/${jdbcDatabase}"
+    val jdbcUrl = s"jdbc:postgresql://${jdbcHostname}:${jdbcPort}/${jdbcDatabase}"
 
     val connectionProperties = new Properties()
     connectionProperties.put("user", jdbcUsername)
