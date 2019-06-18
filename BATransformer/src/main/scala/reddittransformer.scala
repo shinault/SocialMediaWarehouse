@@ -2,7 +2,7 @@ package reddittransformer
 
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import java.sql.{Connection, DriverManager}
-import scala.util.Properties
+import java.util.Properties
 
 object RedditTransformer {
   val spark = SparkSession
