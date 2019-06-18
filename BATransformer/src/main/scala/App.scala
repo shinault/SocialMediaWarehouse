@@ -10,9 +10,10 @@ object App {
       }
 
       case "reddit" => {
-        println(s"Collecting files from the glob ${fileGlob}")
+        println(s"Connecting to files from the glob ${fileGlob}...")
         val df = RT.connectToData(fileGlob)
-        println(s"There are this many rows: ${df.count()}")
+        println(s"Reading and writing files to database...")
+        RT.addToDB(df)
         RT.sparkStop()
       }
 
