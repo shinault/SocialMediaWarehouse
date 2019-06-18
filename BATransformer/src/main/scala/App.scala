@@ -7,17 +7,17 @@ object App {
     command match {
       case "stackexchange" => {
         println(s"Connecting to files from the glob ${fileGlob}...")
-        val df = T.connectToXmlData(fileGlob, "comments", "stackexchange")
+        val df = T.connectToXmlData(fileGlob)
         println(s"Reading and writing files to database...")
-        T.addToDB(df)
+        T.addToDB(df, "comments", "stackexchange")
         T.sparkStop()
       }
 
       case "reddit" => {
         println(s"Connecting to files from the glob ${fileGlob}...")
-        val df = T.connectToJsonData(fileGlob, "comments", "reddit")
+        val df = T.connectToJsonData(fileGlob)
         println(s"Reading and writing files to database...")
-        T.addToDB(df)
+        T.addToDB(df, "comments", "reddit")
         T.sparkStop()
       }
 
