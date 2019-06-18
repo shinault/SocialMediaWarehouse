@@ -9,16 +9,16 @@ object App {
         println(s"Connecting to files from the glob ${fileGlob}...")
         val df = T.connectToXmlData(fileGlob, "comments", "stackexchange")
         println(s"Reading and writing files to database...")
-        RT.addToDB(df)
-        RT.sparkStop()
+        T.addToDB(df)
+        T.sparkStop()
       }
 
       case "reddit" => {
         println(s"Connecting to files from the glob ${fileGlob}...")
         val df = T.connectToJsonData(fileGlob, "comments", "reddit")
         println(s"Reading and writing files to database...")
-        RT.addToDB(df)
-        RT.sparkStop()
+        T.addToDB(df)
+        T.sparkStop()
       }
 
       case "hackernews" => {
