@@ -6,7 +6,11 @@ object App {
     val fileGlob = args(1)
     command match {
       case "stackexchange" => {
-        println("This is a valid command, but not yet implemented")
+        println(s"Connecting to files from the glob ${fileGlob}...")
+        val df = T.connectToXmlData(fileGlob, "comments", "stackexchange")
+        println(s"Reading and writing files to database...")
+        RT.addToDB(df)
+        RT.sparkStop()
       }
 
       case "reddit" => {

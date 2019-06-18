@@ -1,6 +1,7 @@
 package transformer
 
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import com.databricks.spark.xml._
 import java.sql.{Connection, DriverManager}
 import java.util.Properties
 
@@ -15,6 +16,11 @@ object Transformer {
   def connectToJsonData(fileGlob: String) = spark.read
     .json(fileGlob)
     .select("created_utc", "body")
+
+  def connectToXmlData(fileGlob: String) = spark.read
+    .option("rowTag", "row")
+    .xml(fileGlob)
+    .select($"_CreationDate".alias("CreationDate"), $"_Text".alias("Text"))
 
   def addToDB(commentsDF: DataFrame, dbName: String, tblName: String) = {
     
