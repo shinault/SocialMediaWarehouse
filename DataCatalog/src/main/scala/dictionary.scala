@@ -30,11 +30,11 @@ object DictBuilder {
 
   def addToDB(df: DataFrame, dbName: String, tblName: String) = {
     
-    val jdbcHostname = System.getenv("DATADICT_DB_HOSTNAME")
-    val jdbcPort = System.getenv("DATADICT_DB_PORT")
+    val jdbcHostname = System.getenv("DB_HOSTNAME")
+    val jdbcPort = System.getenv("DB_PORT")
     val jdbcDatabase = dbName
-    val jdbcUsername = System.getenv("DATADICT_DB_USERNAME")
-    val jdbcPassword = System.getenv("DATADICT_DB_PASSWORD")
+    val jdbcUsername = System.getenv("DB_USERNAME")
+    val jdbcPassword = System.getenv("DB_PASSWORD")
     val jdbcUrl = s"jdbc:postgresql://${jdbcHostname}:${jdbcPort}/${jdbcDatabase}"
 
     val connectionProperties = new Properties()
@@ -44,7 +44,7 @@ object DictBuilder {
     val connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword)
 
     df.write
-      .mode(SaveMode.Append)
+      .mode(SaveMode.Overwrite)
       .jdbc(jdbcUrl, tblName, connectionProperties)
   }
 

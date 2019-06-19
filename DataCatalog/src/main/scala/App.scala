@@ -1,14 +1,21 @@
 import dictionary.DictBuilder
 import datastats.StatsBuilder
+import org.apache.spark.sql.DataFrame
 
 object App {
   def main(args: Array[String]) {
     val command = args(0)
     val dataSource = args(1)
+    val fileName = args(2)
 
     (command, dataSource) match {
       case ("dictionary", "reddit") => {
-        println(s"Valid command, but feature not yet implemented.")
+        val dataLoc = s"s3a://saywhat-warehouse/raw/reddit/${fileName}"
+        println(s"Getting files from $dataSource")
+        val fullDF: DataFrame = DictBuilder.connectToJson(dataLoc)
+        val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
+        println(s"Writing to database")
+        DictBuilder.addToDB(dictDF, "dictionaries", fileName)
       }
 
       case ("dictionary", "stackexchange") => {
