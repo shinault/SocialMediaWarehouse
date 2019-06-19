@@ -1,5 +1,4 @@
 import dictionary.DictBuilder
-import datastats.StatsBuilder
 import org.apache.spark.sql.DataFrame
 
 object App {
