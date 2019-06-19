@@ -14,7 +14,8 @@ object App {
         val fullDF: DataFrame = DictBuilder.connectToJson(dataLoc)
         val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
         println(s"Writing to database")
-        DictBuilder.addToDB(dictDF, "dictionaries", fileName)
+        val tblName = fileName.replaceAll("-", "_")
+        DictBuilder.addToDB(dictDF, "dictionaries", tblName)
       }
 
       case ("dictionary", "stackexchange") => {
