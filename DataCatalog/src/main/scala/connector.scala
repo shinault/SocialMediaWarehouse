@@ -3,7 +3,6 @@ package connector
 import com.databricks.spark.xml._
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.conf.Configuration
-import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import java.net.URI
 import java.sql.{Connection, DriverManager}
@@ -46,10 +45,9 @@ object Connector {
   // Inspired by this answer:
   // https://stackoverflow.com/questions/54060265/how-to-list-files-in-s3-bucket-using-spark-session
   def getAllObjects() = {
-    val sc = new SparkContext()
-    sc.hadoopConfiguration.set("fs.s3n.awsAccessKeyId",
+    spark.sparkContext.hadoopConfiguration.set("fs.s3n.awsAccessKeyId",
       System.getenv("AWS_ACCESS_KEY_ID"))
-    sc.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey",
+    spark.sparkContext.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey",
       System.getenv("AWS_SECRET_ACCESS_KEY"))
     val rootPath = "s3a://saywhat-warehouse/raw"
     val fs = FileSystem.get(URI.create(rootPath), new Configuration(true))
