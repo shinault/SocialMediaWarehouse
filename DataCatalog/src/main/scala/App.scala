@@ -1,21 +1,31 @@
 import dictionary.DictBuilder
+import connector.Connector
+
 import org.apache.spark.sql.DataFrame
 
 object App {
+
   def main(args: Array[String]) {
     val command = args(0)
     val dataSource = args(1)
-    val fileName = args(2)
 
     (command, dataSource) match {
       case ("dictionary", "reddit") => {
-        val dataLoc = s"s3a://saywhat-warehouse/raw/reddit/${fileName}"
-        println(s"Getting files from $dataSource")
-        val fullDF: DataFrame = DictBuilder.connectToJson(dataLoc)
-        val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
-        println(s"Writing to database")
-        val tblName = fileName.replaceAll("-", "_")
-        DictBuilder.addToDB(dictDF, "dictionaries", tblName)
+        val objectIterator = Connector.getAllObjects()
+        while (objectIterator.hasNext) {
+          val fileStatus = objectIterator.next
+          val dataLoc = fileStatus.getPath
+          val fileName = dataLoc.getName
+
+          if (dataLoc.getParent.getName == "reddit") {
+            println(s"Getting files from reddit")
+            val fullDF: DataFrame = DictBuilder.connectToJson(dataLoc.toString)
+            val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
+            println(s"Writing to database")
+            val tblName = fileName.replaceAll("-", "_")
+            DictBuilder.addToDB(dictDF, "dictionaries", tblName)
+          }
+        }
       }
 
       case ("dictionary", "stackexchange") => {

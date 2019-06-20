@@ -14,8 +14,8 @@ spark-submit \
     --class App \
     --driver-class-path $DCPATH \
     --jars $JARS \
+    --master $SPARK_MASTER_PATH
     target/scala-2.11/data-catalog-builder_2.11-1.0.jar \
     $1 \
-    $2 \
-    $3
+    $2 
     
