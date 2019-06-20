@@ -45,9 +45,9 @@ object Connector {
   // Inspired by this answer:
   // https://stackoverflow.com/questions/54060265/how-to-list-files-in-s3-bucket-using-spark-session
   def getAllObjects() = {
-    spark.sparkContext.hadoopConfiguration.set("fs.s3n.awsAccessKeyId",
+    spark.sparkContext.hadoopConfiguration.set("fs.s3a.access.key",
       System.getenv("AWS_ACCESS_KEY_ID"))
-    spark.sparkContext.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey",
+    spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key",
       System.getenv("AWS_SECRET_ACCESS_KEY"))
     val rootPath = "s3a://saywhat-warehouse/raw"
     val fs = FileSystem.get(URI.create(rootPath), new Configuration(true))
