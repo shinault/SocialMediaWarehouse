@@ -1,5 +1,5 @@
 import dictionary.DictBuilder
-import helpers.{RedditHelper => RH}
+import helpers.{RedditHelper => RH, StackExchangeHelper => SEH}
 
 import org.apache.spark.sql.DataFrame
 
@@ -24,7 +24,18 @@ object App {
       }
 
       case ("dictionary", "stackexchange") => {
-        println(s"Valid command, but feature not yet implemented.")
+        val domains: Seq[String] = SEH.getAllDomains()
+        val seFiles: Seq[String] = domains.flatMap(dom => SEH.fileGenerator(dom))
+        val baseUrl = "s3a://saywhat-warehouse/raw/stack_exchange/"
+        for (fileName <- seFiles) {
+          val fileLoc = baseUrl ++ fileName
+          println(s"Getting files from $fileLoc")
+          val fullDF: DataFrame = DictBuilder.connectToXml(fileLoc)
+          val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
+          println(s"Writing to database")
+          val tblName = fileName.replaceAll(".-/", "_")
+          DictBuilder.addToDB(dictDF, "dictionaries", tblName)
+        }
       }
 
       case ("dictionary", "hackernews") => {
