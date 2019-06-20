@@ -1,5 +1,5 @@
 import dictionary.DictBuilder
-import connector.Connector
+import helpers.{RedditHelper => RH}
 
 import org.apache.spark.sql.DataFrame
 
@@ -11,20 +11,15 @@ object App {
 
     (command, dataSource) match {
       case ("dictionary", "reddit") => {
-        val objectIterator = Connector.getAllObjects()
-        while (objectIterator.hasNext) {
-          val fileStatus = objectIterator.next
-          val dataLoc = fileStatus.getPath
-          val fileName = dataLoc.getName
-
-          if (dataLoc.getParent.getName == "reddit") {
-            println(s"Getting files from reddit")
-            val fullDF: DataFrame = DictBuilder.connectToJson(dataLoc.toString)
-            val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
-            println(s"Writing to database")
-            val tblName = fileName.replaceAll("-", "_")
-            DictBuilder.addToDB(dictDF, "dictionaries", tblName)
-          }
+        val redditFiles = RH.fileGenerator(2005, 12, 2017, 9)
+        for (fileName <- redditFiles) {
+          val fileLoc = "s3a://saywhat-warehouse/raw/reddit/" ++ fileName
+          println(s"Getting files from $fileLoc")
+          val fullDF: DataFrame = DictBuilder.connectToJson(fileLoc)
+          val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
+          println(s"Writing to database")
+          val tblName = fileName.replaceAll("-", "_")
+          DictBuilder.addToDB(dictDF, "dictionaries", tblName)
         }
       }
 
