@@ -29,17 +29,4 @@ object StackExchangeHelper {
     val seXML = XML.load("https://archive.org/download/stackexchange/Sites.xml")
     (seXML \ "row").map(x => (x \"@Url").toString.drop(8))
   }
-
-  def fileGenerator(domain: String): Seq[String] = {
-    val files: Seq[String] = Seq(
-      "Badges.xml",
-      "Comments.xml",
-      "PostHistory.xml",
-      "PostLinks.xml",
-      "Posts.xml",
-      "Tags.xml",
-      "Users.xml",
-      "Votes.xml")
-    files.map(file => s"${domain}/$file")
-  }
 }

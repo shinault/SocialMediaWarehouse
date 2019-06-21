@@ -6,8 +6,9 @@ object App {
     val command = args(0)
     command match {
       case "stackexchange" => {
-        val seFiles = SEH.getAllDomains().flatMap(dom => SEH.fileGenerator(dom))
-        for (fileName <- seFiles) {
+        val seDoms = SEH.getAllDomains()
+        for (dom <- seDoms) {
+          val fileName = dom ++ "/Comments.xml"
           println(s"Connecting to files from the glob ${fileName}...")
           val fileLoc = "s3a://saywhat-warehouse/raw/stack_exchange/" ++ fileName
           val df = T.connectToXmlData(fileLoc)
