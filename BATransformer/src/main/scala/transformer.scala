@@ -13,14 +13,19 @@ object Transformer {
 
   import spark.implicits._
 
-  def connectToJsonData(fileGlob: String) = spark.read
-    .json(fileGlob)
-    .select("created_utc", "body")
+  def connectToJsonData(fileGlob: String) = {
+    val df = spark.read
+      .json(fileGlob)
+    df.select(df.col("created_utc").cast("timestamp"), df.col("body"))
+  }
 
-  def connectToXmlData(fileGlob: String) = spark.read
+  def connectToXmlData(fileGlob: String) = {
+    val df = spark.read
     .option("rowTag", "row")
     .xml(fileGlob)
-    .select($"_CreationDate".alias("CreationDate"), $"_Text".alias("Text"))
+      .select($"_CreationDate".alias("CreationDate"), $"_Text".alias("Text"))
+    df.select(df.col("CreationDate").cast("timestamp"), df.col("Text"))
+  }
 
   def addToDB(commentsDF: DataFrame, dbName: String, tblName: String) = {
     

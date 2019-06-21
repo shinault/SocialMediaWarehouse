@@ -1,24 +1,32 @@
 import transformer.{Transformer => T}
+import helpers.{RedditHelper => RH, StackExchangeHelper => SEH}
 
 object App {
   def main(args: Array[String]) {
     val command = args(0)
-    val fileGlob = args(1)
     command match {
       case "stackexchange" => {
-        println(s"Connecting to files from the glob ${fileGlob}...")
-        val df = T.connectToXmlData(fileGlob)
-        println(s"Reading and writing files to database...")
-        T.addToDB(df, "comments", "stackexchange")
-        T.sparkStop()
+        val seFiles = SEH.getAllDomains().flatMap(dom => SEH.fileGenerator(dom))
+        for (fileName <- seFiles) {
+          println(s"Connecting to files from the glob ${fileName}...")
+          val fileLoc = "s3a://saywhat-warehouse/raw/stack_exchange/" ++ fileName
+          val df = T.connectToXmlData(fileLoc)
+          println(s"Reading and writing files to database...")
+          T.addToDB(df, "comments", "stackexchange")
+          T.sparkStop()
+        }
       }
 
       case "reddit" => {
-        println(s"Connecting to files from the glob ${fileGlob}...")
-        val df = T.connectToJsonData(fileGlob)
-        println(s"Reading and writing files to database...")
-        T.addToDB(df, "comments", "reddit")
-        T.sparkStop()
+        val redditFiles = RH.fileGenerator(2005, 12, 2017, 9)
+        for (fileName <- redditFiles) {
+          println(s"Connecting to files from the glob ${fileName}...")
+          val fileLoc = "s3a://saywhat-warehouse/raw/reddit/" ++ fileName
+          val df = T.connectToJsonData(fileLoc)
+          println(s"Reading and writing files to database...")
+          T.addToDB(df, "comments", "reddit")
+          T.sparkStop()
+        }
       }
 
       case "hackernews" => {
