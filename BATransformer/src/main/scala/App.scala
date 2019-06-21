@@ -14,8 +14,8 @@ object App {
           val df = T.connectToXmlData(fileLoc)
           println(s"Reading and writing files to database...")
           T.addToDB(df, "comments", "stackexchange")
-          T.sparkStop()
         }
+        T.sparkStop()
       }
 
       case "reddit" => {
@@ -26,8 +26,8 @@ object App {
           val df = T.connectToJsonData(fileLoc)
           println(s"Reading and writing files to database...")
           T.addToDB(df, "comments", "reddit")
-          T.sparkStop()
         }
+        T.sparkStop()
       }
 
       case "hackernews" => {
