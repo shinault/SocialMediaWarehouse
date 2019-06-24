@@ -27,7 +27,7 @@ object RedditHelper {
 object StackExchangeHelper {
   def getAllDomains(): Seq[String] = {
     val seXML = XML.load("https://archive.org/download/stackexchange/Sites.xml")
-    (seXML \ "row").map(x => (x \"@Url").toString)
+    (seXML \ "row").map(x => (x \"@Url").toString.drop(8))
   }
 
   def fileGenerator(domain: String): Seq[String] = {
