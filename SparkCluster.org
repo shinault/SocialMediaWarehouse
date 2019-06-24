@@ -1,0 +1,73 @@
+* Spark Cluster Set Up
+
+** Basic Installations
+
+On all four EC2 instances, we install Java and Scala
+
+#+BEGIN_SRC bash
+sudo apt install openjdk-8-jdk
+sudo apt install scala
+#+END_SRC
+
+The Scala version installed was 2.11.12.
+
+It was also necessary to install SBT
+
+#+BEGIN_SRC bash
+echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
+sudo apt-get update
+sudo apt-get install sbt
+#+END_SRC
+
+
+Then we add the Java binary to the path.
+
+#+BEGIN_SRC bash
+export \$JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=\$PATH:\$JAVA_HOME/bin
+#+END_SRC
+
+Then we must set up passwordless SSH so that the machines in the
+cluster can communicate with each other.
+
+#+BEGIN_SRC bash
+sudo apt install openssh-server openssh-client
+#+END_SRC
+
+Then we generate a public/private key for the master machine.
+
+#+BEGIN_SRC bash
+cd ~/.ssh
+ssh-keygen -t rsa -P ""
+#+END_SRC
+
+Choose ~id_rsa~ for the location to place the private key.  Manually
+copy the public key to ~.ssh/authorized_keys~ on each of the worker
+nodes.
+
+
+** Additional Dependencies
+
+There are some jars we need for the specific tasks we will carry out.
+We can get those manually.
+
+#+BEGIN_SRC bash
+mkdir /usr/local/spark/lib/
+cd /usr/local/spark/lib/
+wget http://central.maven.org/maven2/com/amazonaws/aws-java-sdk/1.7.4/aws-java-sdk-1.7.4.jar
+wget http://central.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.7.1/hadoop-aws-2.7.1.jar
+wget https://repo1.maven.org/maven2/com/databricks/spark-xml_2.11/0.5.0/spark-xml_2.11-0.5.0.jar
+#+END_SRC
+
+We're going to need the appropriate drivers for connecting to a
+Postgres database using JDBC.  So we install the following.
+
+#+BEGIN_SRC bash
+sudo apt install libpostgresql-jdbc-java
+#+END_SRC
+
+This adds the necessary jars to the ~/usr/share/java~ folder.  We have
+to make sure to include the appropriate jar from this folder in both
+the ~--driver-class-path~ flag and ~--jars~ flag when submitting a
+Spark job.
