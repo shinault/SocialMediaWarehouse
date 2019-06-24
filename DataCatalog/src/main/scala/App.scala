@@ -32,8 +32,8 @@ object App {
           println(s"Getting files from $fileLoc")
           val fullDF: DataFrame = DictBuilder.connectToXml(fileLoc)
           val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
-          println(s"Writing to database")
           val tblName = fileName.replaceAll(".-/", "_")
+          println(s"Writing to database the table $tblName")
           DictBuilder.addToDB(dictDF, "dictionaries", tblName)
         }
       }
