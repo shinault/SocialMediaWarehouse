@@ -24,8 +24,8 @@ sudo apt-get install sbt
 Then we add the Java binary to the path.
 
 #+BEGIN_SRC bash
-export \$JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-export PATH=\$PATH:\$JAVA_HOME/bin
+export $JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=$PATH:$JAVA_HOME/bin
 #+END_SRC
 
 Then we must set up passwordless SSH so that the machines in the
@@ -71,3 +71,19 @@ This adds the necessary jars to the ~/usr/share/java~ folder.  We have
 to make sure to include the appropriate jar from this folder in both
 the ~--driver-class-path~ flag and ~--jars~ flag when submitting a
 Spark job.
+
+** Environmental Variables
+
+As written, the code relies on a handful of environmental variables.
+I defined the following variables in the ~.profile~ file of the home 
+directories on my Spark cluster.
++ ~AWS_ACCESS_KEY_ID~
++ ~AWS_SECRET_ACCESS_KEY~
++ ~DB_HOSTNAME~
++ ~DB_PORT~
++ ~DB_USERNAME~
++ ~DB_PASSWORD~
++ ~SPARK_MASTER_PATH~
+Whatever you do, do not hardcode the actual values for these variables
+into the source code.  You might accidentally push it to a public
+repo, then anyone can get all your stuff.
