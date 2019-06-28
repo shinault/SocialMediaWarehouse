@@ -53,7 +53,7 @@ object Transformer {
     .withColumn("id", monotonically_increasing_id())
 
   def cleanHNDF(df: DataFrame): DataFrame = df
-    .filter(length(col("body.text") > 80))
+    .filter(length(col("body.text")) > 80)
     .select(
       $"body.time".cast("timestamp").alias("datetime"),
       $"body.text".alias("text")
