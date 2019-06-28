@@ -14,7 +14,7 @@ object App {
           val df = T.connectToXmlData(fileLoc)
           val cleanedDF = T.cleanStackExchangeDF(df)
           println(s"Reading and writing files to database...")
-          T.addToDB(df, "comments", "long_comments")
+          T.addToDB(cleanedDF, "comments", "long_comments")
         }
         T.sparkStop()
       }
