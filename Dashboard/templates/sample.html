@@ -1,7 +1,25 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
 <div class="container">
   <div class="page-header"><h2>Sample Application</h2></div>
+
+  <div class="body">
+    <p>A description of the app.
+    </p>
+  </div>
+
+  {{ wtf.quick_form(form) }}
+
+  <br><br>
+  
+  <div class="table">
+  {% if table %}
+  {{ table }}
+  {% else %}
+  <h3>Submit a query!</h3>
+  {% endif %}
+  </div>
 </div>
 {% endblock %}
