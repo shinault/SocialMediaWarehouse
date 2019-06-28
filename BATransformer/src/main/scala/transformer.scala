@@ -52,6 +52,15 @@ object Transformer {
     .withColumn("source", lit("stackexchange"))
     .withColumn("id", monotonically_increasing_id())
 
+  def cleanHNDF(df: DataFrame): DataFrame = df
+    .filter(length(col("body.text") > 80))
+    .select(
+      $"body.time".cast("timestamp").alias("datetime"),
+      $"body.text".alias("text")
+    )
+    .withColumn("source", lit("hackernews"))
+    .withColumn("id", monotonically_increasing_id())
+
   def addToDB(commentsDF: DataFrame, dbName: String, tblName: String) = {
     
     val jdbcHostname = System.getenv("DB_HOSTNAME")

@@ -33,7 +33,14 @@ object App {
       }
 
       case "hackernews" => {
-        println("This is a valid command, but not yet implemented")
+        val hnFile = "14m_hn_comments_sorted.json"
+        println(s"Connecting to files from the glob ${hnFile}...")
+        val fileLoc = "s3a://saywhat-warehouse/raw/hacker_news/" ++ hnFile
+        val df = T.connectToJsonData(fileLoc)
+        val cleanedDF = T.cleanHNDF(df)
+        println(s"Reading and writing files to database...")
+        T.addToDB(cleanedDF, "comments", "long_comments")
+        T.sparkStop()
       }
 
       case _ => {
