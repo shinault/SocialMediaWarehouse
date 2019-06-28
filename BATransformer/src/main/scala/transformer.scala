@@ -1,6 +1,13 @@
 package transformer
 
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.functions.{
+  col,
+  from_unixtime,
+  lit,
+  length,
+  monotonically_increasing_id}
+import org.apache.spark.sql.types._
 import com.databricks.spark.xml._
 import java.sql.{Connection, DriverManager}
 import java.util.Properties
@@ -13,19 +20,37 @@ object Transformer {
 
   import spark.implicits._
 
-  def connectToJsonData(fileGlob: String) = {
-    val df = spark.read
-      .json(fileGlob)
-    df.select(df.col("created_utc").cast("timestamp"), df.col("body"))
+  def connectToJsonData(fileGlob: String): DataFrame = spark.read.json(fileGlob)
+
+  def cleanRedditDF(df: DataFrame): DataFrame = df.filter(length(col("body")) > 80)
+    .select(
+      ($"created_utc").cast("long").cast("timestamp").alias("datetime"),
+      $"body".alias("text"))
+    .withColumn("source", lit("reddit"))
+    .withColumn("id", monotonically_increasing_id())
+
+  def connectToXmlData(fileGlob: String): DataFrame = {
+    val customSchema = StructType(Array(
+      StructField("_CreationDate", TimestampType),
+      StructField("_Id", LongType),
+      StructField("_PostId", LongType),
+      StructField("_Score", LongType),
+      StructField("_Text", StringType),
+      StructField("_UserId", LongType)
+    ))
+    spark.read
+      .option("rowTag", "row")
+      .schema(customSchema)
+      .xml(fileGlob)
   }
 
-  def connectToXmlData(fileGlob: String) = {
-    val df = spark.read
-    .option("rowTag", "row")
-    .xml(fileGlob)
-      .select($"_CreationDate".alias("CreationDate"), $"_Text".alias("Text"))
-    df.select(df.col("CreationDate").cast("timestamp"), df.col("Text"))
-  }
+  def cleanStackExchangeDF(df: DataFrame): DataFrame = df
+    .filter(length(col("_Text")) > 80)
+    .select(
+      $"_CreationDate".alias("datetime"),
+      $"_Text".alias("text"))
+    .withColumn("source", lit("stackexchange"))
+    .withColumn("id", monotonically_increasing_id())
 
   def addToDB(commentsDF: DataFrame, dbName: String, tblName: String) = {
     

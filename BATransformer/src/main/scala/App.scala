@@ -12,6 +12,7 @@ object App {
           println(s"Connecting to files from the glob ${fileName}...")
           val fileLoc = "s3a://saywhat-warehouse/raw/stack_exchange/" ++ fileName
           val df = T.connectToXmlData(fileLoc)
+          val cleanedDF = T.cleanStackExchangeDF(df)
           println(s"Reading and writing files to database...")
           T.addToDB(df, "comments", "stackexchange")
         }
@@ -19,13 +20,14 @@ object App {
       }
 
       case "reddit" => {
-        val redditFiles = RH.fileGenerator(2005, 12, 2017, 9)
+        val redditFiles = RH.fileGenerator(2016, 1, 2016, 12)
         for (fileName <- redditFiles) {
           println(s"Connecting to files from the glob ${fileName}...")
           val fileLoc = "s3a://saywhat-warehouse/raw/reddit/" ++ fileName
           val df = T.connectToJsonData(fileLoc)
+          val cleanedDF = T.cleanRedditDF(df)
           println(s"Reading and writing files to database...")
-          T.addToDB(df, "comments", "reddit")
+          T.addToDB(cleanedDF, "comments", "reddit")
         }
         T.sparkStop()
       }
