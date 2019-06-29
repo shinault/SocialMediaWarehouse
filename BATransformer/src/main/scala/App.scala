@@ -20,7 +20,7 @@ object App {
       }
 
       case "reddit" => {
-        val redditFiles = RH.fileGenerator(2016, 1, 2016, 12)
+        val redditFiles = RH.fileGenerator(2014, 1, 2014, 12)
         for (fileName <- redditFiles) {
           println(s"Connecting to files from the glob ${fileName}...")
           val fileLoc = "s3a://saywhat-warehouse/raw/reddit/" ++ fileName

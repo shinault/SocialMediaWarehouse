@@ -31,12 +31,13 @@ object Transformer {
 
   def connectToXmlData(fileGlob: String): DataFrame = {
     val customSchema = StructType(Array(
-      StructField("_CreationDate", TimestampType),
+      StructField("_CreationDate", StringType),
       StructField("_Id", LongType),
       StructField("_PostId", LongType),
       StructField("_Score", LongType),
       StructField("_Text", StringType),
-      StructField("_UserId", LongType)
+      StructField("_UserId", LongType),
+      StructField("_UserDisplayName", StringType)
     ))
     spark.read
       .option("rowTag", "row")
@@ -47,7 +48,7 @@ object Transformer {
   def cleanStackExchangeDF(df: DataFrame): DataFrame = df
     .filter(length(col("_Text")) > 80)
     .select(
-      $"_CreationDate".alias("datetime"),
+      $"_CreationDate".cast("timestamp").alias("datetime"),
       $"_Text".alias("text"))
     .withColumn("source", lit("stackexchange"))
     .withColumn("id", monotonically_increasing_id())
