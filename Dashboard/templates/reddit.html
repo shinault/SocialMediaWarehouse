@@ -5,6 +5,16 @@
 <div class="container">
   <div class="page-header"><h2>Data Dictionary</h2></div>
 
+  <p>The raw Reddit data is stored in a bucket.  The files are JSON,
+    with each file containing the content for a single month.  The
+    naming convention for the files follows RC_{year}-{month}.
+  </p>
+
+  <p>Because the data available changes over time, the fields in each
+    file will change.  Choose a source file to see the schema for that
+    file.
+  </p>
+
   {{ wtf.quick_form(form) }}
 
   <br><br>

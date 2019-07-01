@@ -140,7 +140,7 @@ def stackexchange():
 
 @app.route("/catalog/hackernews", methods=["GET"])
 def hackernews():
-    conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
+    conn = psycopg2.connect("dbname='comments' user='{}' host='{}' password='{}' port='{}'"
                             .format(dict_user, dict_host, dict_pw, dict_port))
     cur = conn.cursor()
     table_name = "hackernews"
@@ -162,11 +162,13 @@ def sample():
         cur = conn.cursor()
         fromDate = form.fromDate.data
         toDate = form.toDate.data
+        search = form.searchString.data
         select_statement = """SELECT source, COUNT(*) as count from long_comments """
-        where_clause = """WHERE datetime >= {} AND datetime <= {} GROUP BY source"""
-        cur.execute((select_statement + where_clause).format(fromDate, toDate))
-        dict_rows = cur.fetchall()
-        dict_dicts = map(lambda x: dict(source=x[0], count=x[1], dict_rows))
+        where_clause = """WHERE datetime>='{}' AND datetime<='{}' AND text LIKE '%{}%'
+GROUP BY source"""
+        cur.execute((select_statement + where_clause).format(fromDate, toDate, search))
+        count_rows = cur.fetchall()
+        count_dicts = map(lambda x: dict(source=x[0], count=x[1], count_rows))
         table = CommentTable(count_dicts)
     return render_template("sample.html", form=form, table=table)
 

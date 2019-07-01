@@ -3,7 +3,14 @@
 {% block content %}
 <div class="container">
   <div class="page-header"><h2>Data Catalog</h2></div>
-  <p> Some stuff and business.
+  <p> We currently have data collected from three sources.  Click a
+    link to learn more about the format for the data from these
+    sources.
   </p>
+  <ul>
+    <li><a href={{ url_for('reddit') }}>Reddit</a></li>
+    <li><a href={{ url_for('stackexchange) }}>Stack Exchange</a></li>
+    <li><a href={{ url_for('hackernews) }}>Hacker News</a></li>
+  </ul>
 </div>
 {% endblock %}
