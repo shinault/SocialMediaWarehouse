@@ -44,7 +44,8 @@ def all_se_sources():
                      'Tags',
                      'Users',
                      'Votes']:
-            output.append("{}_{}_xml".format(dom, data)
+            source = "{}_{}_xml".format(dom, data)
+            output.append((source, source))
     return output
 
 
@@ -123,7 +124,7 @@ def reddit():
         table_name = form.table.data
         cur.execute("""SELECT * from {}""".format(table_name))
         dict_rows = cur.fetchall()
-	dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
+        dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
                          dict_rows)
         table = DictTable(dict_dicts)
     return render_template("reddit.html", form=form, table=table)
@@ -140,7 +141,7 @@ def stackexchange():
         table_name = form.table.data
         cur.execute("""SELECT * from {}""".format(table_name))
         dict_rows = cur.fetchall()
-	dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
+        dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
                          dict_rows)
         table = DictTable(dict_dicts)
     return render_template("stackexchange.html", form=form, table=table)
