@@ -1,6 +1,5 @@
 from flask import Flask, render_template, redirect, session, url_for
 from flask_bootstrap import Bootstrap
-from flask_sqlalchemy import SQLAlchemy
 from flask_table import Col, Table
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, SubmitField
@@ -53,27 +52,19 @@ def all_se_sources():
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 
-def set_db_config(user_var, pw_var, host_var, name_var):
-    db_type = "postgresql://"
-    db_user = os.environ[user_var]
-    db_password = os.environ[pw_var]
-    db_hostname = os.environ[host_var]
-    db_name = os.environ[name_var]
-    db_post = os.environ[port_var]
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_type + db_user + ":" + db_password +\
-                                        "@" + db_hostname + ":" + db_port + "/" +\
-                                        db_name
-
-    
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db = SQLAlchemy(app)
-
-app.config["SECRET_KEY"] = os.environ["FLASK_SECRET"]
+db_user = os.environ['DB_USER']
+db_password = os.environ['DB_PASSWORD']
+db_hostname = os.environ['DB_HOSTNAME']
+db_name = os.environ['DB_NAME']
+db_post = os.environ['DB_PORT']
                           
 dict_user = os.environ['DICT_USER']
 dict_pw = os.environ['DICT_PW']
 dict_host = os.environ['DICT_HOST']
 dict_port = os.environ['DICT_PORT']
+
+app.config["SECRET_KEY"] = os.environ["FLASK_SECRET"]
+
 
 ## Forms
 class AppForm(FlaskForm):
@@ -119,7 +110,7 @@ def reddit():
     form = RedditForm()
     if form.validate_on_submit():
         conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
-                                .format(dict_user, dict_pw, dict_host, dict_port))
+                                .format(dict_user, dict_host, dict_pw, dict_port))
         cur = conn.cursor()
         table_name = form.table.data
         cur.execute("""SELECT * from {}""".format(table_name))
@@ -136,7 +127,7 @@ def stackexchange():
     form = SEForm()
     if form.validate_on_submit():
         conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
-                                .format(dict_user, dict_pw, dict_host, dict_port))
+                                .format(dict_user, dict_host, dict_pw, dict_port))
         cur = conn.cursor()
         table_name = form.table.data
         cur.execute("""SELECT * from {}""".format(table_name))
@@ -147,35 +138,37 @@ def stackexchange():
     return render_template("stackexchange.html", form=form, table=table)
 
 
-@app.route("/catalog/hackernews", methods=["GET", "POST"])
+@app.route("/catalog/hackernews", methods=["GET"])
 def hackernews():
-    table = None
-    return render_template("hackernews.html", form=form, table=table)
+    conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
+                            .format(dict_user, dict_host, dict_pw, dict_port))
+    cur = conn.cursor()
+    table_name = "hackernews"
+    cur.execute("""SELECT * from {}""".format(table_name))
+    dict_rows = cur.fetchall()
+    dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
+                     dict_rows)
+    table = DictTable(dict_dicts)
+    return render_template("hackernews.html", table=table)
 
 
 @app.route("/sample", methods=["GET", "POST"])
 def sample():
-    set_db_config("DB_USER", "DB_PASSWORD", "DB_HOSTNAME", "COMMENT_DB")
     table = None
     form = AppForm()
     if form.validate_on_submit():
-        count_data = db.session \
-                    .query(Comment.source, db.func.count(Comment.text)) \
-                    .filter(Comment.datetime >= form.fromDate.data) \
-                    .filter(Comment.datetime <= form.toDate.data) \
-                    .group_by(Comment.source) \
-                    .all()
-        table = CommentTable(count_data)
+        conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
+                                .format(dict_user, dict_host, dict_pw, dict_port))
+        cur = conn.cursor()
+        fromDate = form.fromDate.data
+        toDate = form.toDate.data
+        select_statement = """SELECT source, COUNT(*) as count from long_comments """
+        where_clause = """WHERE datetime >= {} AND datetime <= {} GROUP BY source"""
+        cur.execute((select_statement + where_clause).format(fromDate, toDate))
+        dict_rows = cur.fetchall()
+        dict_dicts = map(lambda x: dict(source=x[0], count=x[1], dict_rows))
+        table = CommentTable(count_dicts)
     return render_template("sample.html", form=form, table=table)
-
-
-## Models
-class Comment(db.Model):
-     __tablename__ = "long_comments"
-     id = db.Column(db.Integer, primary_key=True)
-     text = db.Column(db.String(64))
-     datetime = db.Column(db.DateTime)
-     source = db.Column(db.String(64))
 
 
 ## Tables
