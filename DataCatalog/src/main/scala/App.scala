@@ -39,7 +39,13 @@ object App {
       }
 
       case ("dictionary", "hackernews") => {
-        println(s"Valid command, but feature not yet implemented.")
+        val fileLoc = "s3a://saywhat-warehouse/raw/hacker_news/14m_hn_comments_sorted.json"
+        println(s"Getting file from $fileLoc")
+        val fullDF: DataFrame = DictBuilder.connectToJson(fileLoc)
+        val dictDF: DataFrame = DictBuilder.createDictDF(fullDF)
+        println(s"Writing to database")
+        val tblName = "hackernews"
+        DictBuilder.addToDB(dictDF, "dictionaries", tblName)
       }
 
       case ("stats", "reddit") => {
