@@ -6,6 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, SubmitField
 from wtforms.fields.html5 import DateField, DateTimeField
 from wtforms.validators import DataRequired
+import xml.etree.ElementTree as ET
 
 import os
 import psycopg2
@@ -21,6 +22,29 @@ def all_reddit_sources():
     for month in range(1, 12):
         table_name = "rc_2016_{0:02d}".format(month)
         output.append((table_name, table_name))
+    return output
+
+def all_se_domains():
+    output = []
+    tree = ET.parse('Sites.xml')
+    root = tree.getroot()
+    for child in root:
+        output.append(child.attrib['Url'][8:].replace('.', '_'))
+    return output
+
+def all_se_sources():
+    output = []
+    doms = all_se_domains()
+    for dom in doms:
+        for data in ['Badges',
+                     'Comments',
+                     'PostHistory',
+                     'PostLinks',
+                     'Posts',
+                     'Tags',
+                     'Users',
+                     'Votes']:
+            output.append("{}_{}_xml".format(dom, data)
     return output
 
 
@@ -44,6 +68,11 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 app.config["SECRET_KEY"] = os.environ["FLASK_SECRET"]
+                          
+dict_user = os.environ['DICT_USER']
+dict_pw = os.environ['DICT_PW']
+dict_host = os.environ['DICT_HOST']
+dict_port = os.environ['DICT_PORT']
 
 ## Forms
 class AppForm(FlaskForm):
@@ -67,6 +96,11 @@ class RedditForm(FlaskForm):
     table = SelectField("Raw Data", choices = all_reddit_sources())
     submit = SubmitField("Submit")
 
+class SEForm(FlaskForm):
+    table = SelectField("Raw Data", choices = all_se_sources())
+    submit = SubmitField("Submit")
+
+
 
 ## Routes
 @app.route("/")
@@ -77,22 +111,46 @@ def index():
 def catalog():
     return render_template("catalog.html")
 
+
 @app.route("/catalog/reddit", methods=["GET", "POST"])
 def reddit():
     table = None
     form = RedditForm()
     if form.validate_on_submit():
-        dict_user = os.environ['DICT_USER']
-        dict_pw = os.environ['DICT_PW']
-        dict_host = os.environ['DICT_HOST']
-        conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}'"
-                                .format(dict_user, dict_pw, dict_host))
+        conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
+                                .format(dict_user, dict_pw, dict_host, dict_port))
         cur = conn.cursor()
         table_name = form.table.data
         cur.execute("""SELECT * from {}""".format(table_name))
         dict_rows = cur.fetchall()
-        table = DictTable(dict_rows)
+	dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
+                         dict_rows)
+        table = DictTable(dict_dicts)
     return render_template("reddit.html", form=form, table=table)
+
+                          
+@app.route("/catalog/stackexchange", methods=["GET", "POST"])
+def stackexchange():
+    table = None
+    form = SEForm()
+    if form.validate_on_submit():
+        conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
+                                .format(dict_user, dict_pw, dict_host, dict_port))
+        cur = conn.cursor()
+        table_name = form.table.data
+        cur.execute("""SELECT * from {}""".format(table_name))
+        dict_rows = cur.fetchall()
+	dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
+                         dict_rows)
+        table = DictTable(dict_dicts)
+    return render_template("stackexchange.html", form=form, table=table)
+
+
+@app.route("/catalog/hackernews", methods=["GET", "POST"])
+def hackernews():
+    table = None
+    return render_template("hackernews.html", form=form, table=table)
+
 
 @app.route("/sample", methods=["GET", "POST"])
 def sample():
@@ -123,6 +181,11 @@ class Comment(db.Model):
 class CommentTable(Table):
     source = Col('Source')
     count = Col('Total')
+
+class DictTable(Table):
+    variable = Col("Variable")
+    type = Col("Type")
+    description = Col("Description")
 
 
 if __name__ == "__main__":
