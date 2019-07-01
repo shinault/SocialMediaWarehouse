@@ -8,19 +8,36 @@ from wtforms.fields.html5 import DateField, DateTimeField
 from wtforms.validators import DataRequired
 
 import os
+import psycopg2
+
+
+## Auxiliary functions
+def all_reddit_sources():
+    output = [("rc_2005_12", "rc_2005_12")]
+    for year in range(2006, 2016):
+        for month in range(1, 13):
+            table_name = "rc_{0}_{1:02d}".format(year, month)
+            output.append((table_name, table_name))
+    for month in range(1, 12):
+        table_name = "rc_2016_{0:02d}".format(month)
+        output.append((table_name, table_name))
+    return output
+
 
 ## Config
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 
 def set_db_config(user_var, pw_var, host_var, name_var):
-    db_type = "postgres://"
+    db_type = "postgresql://"
     db_user = os.environ[user_var]
     db_password = os.environ[pw_var]
     db_hostname = os.environ[host_var]
     db_name = os.environ[name_var]
+    db_post = os.environ[port_var]
     app.config["SQLALCHEMY_DATABASE_URI"] = db_type + db_user + ":" + db_password +\
-                                        "/" + db_hostname +  "/" + db_name
+                                        "@" + db_hostname + ":" + db_port + "/" +\
+                                        db_name
 
     
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -46,6 +63,10 @@ class CatalogForm(FlaskForm):
                                       ("hn", "Hacker News")])
     submit = SubmitField("Submit")
 
+class RedditForm(FlaskForm):
+    table = SelectField("Raw Data", choices = all_reddit_sources())
+    submit = SubmitField("Submit")
+
 
 ## Routes
 @app.route("/")
@@ -56,16 +77,22 @@ def index():
 def catalog():
     return render_template("catalog.html")
 
-@app.route("/catalog/dictionary", methods=["GET", "POST"])
-def dictionary():
-    set_db_config("DB_USER", "DB_PASSWORD", "DB_HOSTNAME", "CATALOG_DB")
-    form = CatalogForm()
-    return render_template("dictionary.html", form=form)
-
-@app.route("/catalog/stats", methods=["GET", "POST"])
-def stats():
-    form = CatalogForm()
-    return render_template("stats.html", form=form)
+@app.route("/catalog/reddit", methods=["GET", "POST"])
+def reddit():
+    table = None
+    form = RedditForm()
+    if form.validate_on_submit():
+        dict_user = os.environ['DICT_USER']
+        dict_pw = os.environ['DICT_PW']
+        dict_host = os.environ['DICT_HOST']
+        conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}'"
+                                .format(dict_user, dict_pw, dict_host))
+        cur = conn.cursor()
+        table_name = form.table.data
+        cur.execute("""SELECT * from {}""".format(table_name))
+        dict_rows = cur.fetchall()
+        table = DictTable(dict_rows)
+    return render_template("reddit.html", form=form, table=table)
 
 @app.route("/sample", methods=["GET", "POST"])
 def sample():
@@ -75,8 +102,8 @@ def sample():
     if form.validate_on_submit():
         count_data = db.session \
                     .query(Comment.source, db.func.count(Comment.text)) \
-                    .filter(Comment.timestamp >= form.fromDate.data) \
-                    .filter(Comment.timestamp <= form.toDate.data) \
+                    .filter(Comment.datetime >= form.fromDate.data) \
+                    .filter(Comment.datetime <= form.toDate.data) \
                     .group_by(Comment.source) \
                     .all()
         table = CommentTable(count_data)
@@ -88,7 +115,7 @@ class Comment(db.Model):
      __tablename__ = "long_comments"
      id = db.Column(db.Integer, primary_key=True)
      text = db.Column(db.String(64))
-     timestamp = db.Column(db.DateTime)
+     datetime = db.Column(db.DateTime)
      source = db.Column(db.String(64))
 
 

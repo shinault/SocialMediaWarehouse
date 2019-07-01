@@ -3,12 +3,7 @@
 
 {% block content %}
 <div class="container">
-  <div class="page-header"><h2>Sample Application</h2></div>
-
-  <div class="body">
-    <p>A description of the app.
-    </p>
-  </div>
+  <div class="page-header"><h2>Data Dictionary</h2></div>
 
   {{ wtf.quick_form(form) }}
 
@@ -18,8 +13,9 @@
   {% if table %}
   {{ table }}
   {% else %}
-  <h3>Request a data dictionary!</h3>
+  <h3>Submit a query!</h3>
   {% endif %}
   </div>
+  
 </div>
 {% endblock %}
