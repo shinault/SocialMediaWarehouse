@@ -10,11 +10,22 @@
     naming convention for the files follows RC_{year}-{month}.
   </p>
 
+  <p>Each source file contains some subset of the following attributes.
+  </p>
+
+  <br><br>
+
+  {{ general_dictionary }}
+
+  <br><br>
+
   <p>Because the data available changes over time, the fields in each
     file will change.  Choose a source file to see the schema for that
     file.
   </p>
 
+  <br><br>
+  
   {{ wtf.quick_form(form) }}
 
   <br><br>
@@ -23,7 +34,7 @@
   {% if table %}
   {{ table }}
   {% else %}
-  <h3>Submit a query!</h3>
+  <h3>Request a data dictionary!</h3>
   {% endif %}
   </div>
   

@@ -57,12 +57,24 @@ def fill_feb(df):
         if date not in df.Day:
             df.append({"Day": date, "Count": 0}, ignore_index=True)
 
+def get_dict(table_name, dict_user, dict_host, dict_pw, dict_port):
+    conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
+                            .format(dict_user, dict_host, dict_pw, dict_port))
+    cur = conn.cursor()
+    cur.execute("""SELECT * from {}""".format(table_name))
+    dict_rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
+                     dict_rows)
+    table = DictTable(dict_dicts)
+
 
 # Technique from blog post technovechno.com
 def make_plot(query_data):
     img = io.BytesIO()
     ## Create plot instructions
-    df = pd.DataFrame(query_data, columns=["Day", "Source", "Count"])
+    df = pd.DataFrame(query_data, columns=["Source", "Day", "Count"])
     reddit = df.loc[df.Source=='reddit', ['Day','Count']]
     se = df.loc[df.Source=='stackexchange', ['Day','Count']]
     hn = df.loc[df.Source=='hackernews', ['Day','Count']]
@@ -72,6 +84,7 @@ def make_plot(query_data):
     plt.plot('Day', 'Count', data=reddit, marker='', color='skyblue', linewidth=4, label="Reddit")
     plt.plot('Day', 'Count', data=se, marker='', color='olive', linewidth=4, label="Stack Exchange")
     plt.plot('Day', 'Count', data=hn, marker='', color='orange', linewidth=4, label="Hacker News")
+    plt.xticks(rotation=90)
     plt.legend()
     
     plt.savefig(img, format='png')
@@ -133,17 +146,13 @@ def catalog():
 def reddit():
     table = None
     form = RedditForm()
+    general_dictionary = get_dict('reddit', dict_user, dict_host, dict_pw, dict_port)
     if form.validate_on_submit():
-        conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
-                                .format(dict_user, dict_host, dict_pw, dict_port))
-        cur = conn.cursor()
-        table_name = form.table.data
-        cur.execute("""SELECT * from {}""".format(table_name))
-        dict_rows = cur.fetchall()
-        dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
-                         dict_rows)
-        table = DictTable(dict_dicts)
-    return render_template("reddit.html", form=form, table=table)
+        table = get_dict(form.table.data, dict_user, dict_host, dict_pw, dict_port)
+    return render_template("reddit.html",
+                           form=form,
+                           table=table,
+                           general_dictionary=general_dictionary)
 
                           
 @app.route("/catalog/stackexchange", methods=["GET", "POST"])
@@ -151,15 +160,7 @@ def stackexchange():
     table = None
     form = SEForm()
     if form.validate_on_submit():
-        conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
-                                .format(dict_user, dict_host, dict_pw, dict_port))
-        cur = conn.cursor()
-        table_name = form.table.data
-        cur.execute("""SELECT * from {}""".format(table_name))
-        dict_rows = cur.fetchall()
-        dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
-                         dict_rows)
-        table = DictTable(dict_dicts)
+        table = get_dict(form.table.data)
     return render_template("stackexchange.html", form=form, table=table)
 
 
@@ -186,7 +187,7 @@ def sample():
                                 .format(dict_user, dict_host, dict_pw, dict_port))
         cur = conn.cursor()
         search_term = form.searchString.data
-        select_statement = """SELECT source, DATE(datetime) AS day COUNT(*) AS count FROM long_comments """
+        select_statement = """SELECT source, DATE(datetime) AS day, COUNT(*) AS count FROM long_comments """
         where_clause = """text LIKE '%{}%' GROUP BY source, day"""
         cur.execute((select_statement + where_clause).format(search_term))
         count_rows = cur.fetchall()
@@ -195,6 +196,12 @@ def sample():
         graph = make_plot(count_rows)
     return render_template("sample.html", form=form, graph=graph)
 
+
+## Table Definitions
+class DictTable(Table):
+    variable = Col("Variable")
+    type = Col("Type")
+    description = Col("Description")
 
 if __name__ == "__main__":
     app.debug = True
