@@ -6,11 +6,10 @@
   <div class="page-header"><h2>Sample Application</h2></div>
 
   <div class="body">
-    <p>This is an app that answers the question at the start, for data
-      from 2014.      
+    <p>This is an app that answers the question at the start.
     </p>
-    <p>Choose a time frame a search term to see the number of comments
-      containing to the term from each source.      
+    <p>Choose a search term to see the number of comments containing
+      the term from each source.
     </p>
   </div>
 
@@ -18,12 +17,12 @@
 
   <br><br>
   
-  <div class="table">
-  {% if table %}
-  {{ table }}
-  {% else %}
-  <h3>Submit a query!</h3>
-  {% endif %}
+  <div>
+    {% if graph %}
+    <img src='{{ graph }}'></img>
+    {% else %}
+    <h3>Submit a query!</h3>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
