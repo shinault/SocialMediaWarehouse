@@ -67,7 +67,19 @@ def get_dict(table_name, dict_user, dict_host, dict_pw, dict_port):
     conn.close()
     dict_dicts = map(lambda x: dict(variable=x[0], type=x[1], description=x[2]),
                      dict_rows)
-    table = DictTable(dict_dicts)
+    return DictTable(dict_dicts)
+
+def get_dict_simple(table_name, dict_user, dict_host, dict_pw, dict_port):
+    conn = psycopg2.connect("dbname='dictionaries' user='{}' host='{}' password='{}' port='{}'"
+                            .format(dict_user, dict_host, dict_pw, dict_port))
+    cur = conn.cursor()
+    cur.execute("""SELECT * from {}""".format(table_name))
+    dict_rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    dict_dicts = map(lambda x: dict(variable=x[0], type=x[1]),
+                     dict_rows)
+    return DictSimple(dict_dicts)
 
 
 # Technique from blog post technovechno.com
@@ -101,7 +113,7 @@ db_user = os.environ['DB_USER']
 db_password = os.environ['DB_PASSWORD']
 db_hostname = os.environ['DB_HOSTNAME']
 db_name = os.environ['DB_NAME']
-db_post = os.environ['DB_PORT']
+db_port = os.environ['DB_PORT']
                           
 dict_user = os.environ['DICT_USER']
 dict_pw = os.environ['DICT_PW']
@@ -159,9 +171,27 @@ def reddit():
 def stackexchange():
     table = None
     form = SEForm()
+    badges = get_dict_simple("se_badges", dict_user, dict_host, dict_pw, dict_port)
+    comments = get_dict_simple("se_comments", dict_user, dict_host, dict_pw, dict_port)
+    posthistory = get_dict_simple("se_posthistory", dict_user, dict_host, dict_pw, dict_port)
+    postlinks = get_dict_simple("se_postlinks", dict_user, dict_host, dict_pw, dict_port)
+    posts = get_dict_simple("se_posts", dict_user, dict_host, dict_pw, dict_port)
+    tags = get_dict_simple("se_tags", dict_user, dict_host, dict_pw, dict_port)
+    users = get_dict_simple("se_users", dict_user, dict_host, dict_pw, dict_port)
+    votes = get_dict_simple("se_votes", dict_user, dict_host, dict_pw, dict_port)
     if form.validate_on_submit():
-        table = get_dict(form.table.data)
-    return render_template("stackexchange.html", form=form, table=table)
+        table = get_dict(form.table.data, dict_user, dict_host, dict_pw, dict_port)
+    return render_template("stackexchange.html",
+                           form=form,
+                           table=table,
+                           badges=badges,
+                           comments=comments,
+                           posthistory=posthistory,
+                           postlinks=postlinks,
+                           posts=posts,
+                           tags=tags,
+                           users=users,
+                           votes=votes)
 
 
 @app.route("/catalog/hackernews", methods=["GET"])
@@ -188,7 +218,7 @@ def sample():
         cur = conn.cursor()
         search_term = form.searchString.data
         select_statement = """SELECT source, DATE(datetime) AS day, COUNT(*) AS count FROM long_comments """
-        where_clause = """text LIKE '%{}%' GROUP BY source, day"""
+        where_clause = """WHERE (tsv @@ to_tsquery('%{}%')) GROUP BY source, day"""
         cur.execute((select_statement + where_clause).format(search_term))
         count_rows = cur.fetchall()
         cur.close()
@@ -202,6 +232,10 @@ class DictTable(Table):
     variable = Col("Variable")
     type = Col("Type")
     description = Col("Description")
+    
+class DictSimple(Table):
+    variable = Col("Variable")
+    type = Col("Type")
 
 if __name__ == "__main__":
     app.debug = True

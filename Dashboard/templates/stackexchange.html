@@ -3,7 +3,69 @@
 
 {% block content %}
 <div class="container">
-  <div class="page-header"><h2>Data Dictionary</h2></div>
+  <div class="page-header"><h2>Data Dictionary: Stack Exchange</h2></div>
+
+  <p>The raw Stack Exchange data is organized by their top-level
+    domains in the Stack Exchange network.  For each domain, there are
+    eight types of data organized into separate XML files.
+  </p>
+  <ul>
+    <li>Badges</li>
+    <li>Comments</li>
+    <li>PostHistory</li>
+    <li>PostLinks</li>
+    <li>Posts</li>
+    <li>Tags</li>
+    <li>Users</li>
+    <li>Votes</li>
+  </ul>
+  
+  <p>Each top-level domain is represented as a folder in the SayWhat
+    S3 bucket.  Each of those folders contains an XML file with
+    information for each of the above eight topics.
+  </p>
+
+  <br><br>
+  
+  <div class="table">
+  {{ badges }}
+  </div>
+  
+  <div class="table">
+  {{ comments }}
+  </div>
+  
+  <div class="table">
+  {{ posthistory }}
+  </div>
+  
+  <div class="table">
+  {{ postlinks }}
+  </div>
+  
+  <div class="table">
+  {{ posts }}
+  </div>
+  
+  <div class="table">
+  {{ tags }}
+  </div>
+  
+  <div class="table">
+  {{ users }}
+  </div>
+  
+  <div class="table">
+  {{ votes }}
+  </div>
+
+
+  <p>The information provided may change between sites (and even
+    within observations in the same file), so a table with information
+    on the attributes provided is provided for each top-level domain.
+  </p>
+  
+  <br><br>
 
   {{ wtf.quick_form(form) }}
 
@@ -13,7 +75,7 @@
   {% if table %}
   {{ table }}
   {% else %}
-  <h3>Submit a query!</h3>
+  <h3>Request a data dictionary!</h3>
   {% endif %}
   </div>
   
