@@ -1,5 +1,12 @@
 # Batch Data Ingestion
 
+## Purpose
+
+The python scripts in this folder are used to download and unpack
+source files for information on comments from Reddit, Stack Exchange,
+and Hacker News.  The text files are stored in an S3 bucket which must
+be configured using AWS CLI.
+
 ## Requirements
 
 This uses the following Python 3 packages:

@@ -38,12 +38,11 @@ are contained in their respective folders.
 3. Datastore: PostgreSQL
 4. Dashboard: Flask
 
+
 ## Data Source
 
 * Stack Exchange Posts and Answers: XML in numerous files
 * Hacker News Comments: JSON comments and XML metadata, in a few files
 * Reddit Comments: JSON comments across many files
 
-
-## Engineering Challenges
 
