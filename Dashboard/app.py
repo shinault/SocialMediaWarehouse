@@ -218,7 +218,7 @@ def sample():
         cur = conn.cursor()
         search_term = form.searchString.data
         select_statement = """SELECT source, DATE(datetime) AS day, COUNT(*) AS count FROM long_comments """
-        where_clause = """WHERE (tsv @@ to_tsquery('%{}%')) GROUP BY source, day"""
+        where_clause = """WHERE (tsv @@ to_tsquery('%{}%')) GROUP BY source, day ORDER BY source, day"""
         cur.execute((select_statement + where_clause).format(search_term))
         count_rows = cur.fetchall()
         cur.close()
